@@ -1,0 +1,95 @@
+let rec pow x n = 
+  match n with
+  _ when n < 0 -> 0
+  | 0 -> 1
+  | 1 -> x
+  | _ -> x * pow x (n-1);;
+
+let rec float_pow x n = 
+  if n < 0 then 1.0 /. (float_pow x (-n)) 
+  else match n with
+  | 0 -> 1.0
+  | 1 -> x *. 1.0
+  | _ -> x *. (float_pow x (n - 1));;
+
+let rec reverse a =
+  match a with
+  | [] -> a
+  | hd::tl -> List.append (reverse tl) [hd];;
+
+let rec compress a =
+  match a with
+  | [] -> []
+  | [x] -> a
+  | _ -> if ((List.nth a 0) = (List.nth a 1)) then (compress (List.tl a)) else List.append [(List.hd a)] (compress (List.tl a));;
+
+let rec cluster_helper final_lst a =
+  match a with
+  | [] -> []
+  | [x] -> [List.append [x] final_lst]
+  | first_element::second_element::rest_of_list ->
+    if first_element = second_element 
+    then (cluster_helper (List.append [first_element] final_lst) (List.tl a))
+    else List.append [List.append [first_element] final_lst] (cluster_helper [] (List.tl a));;
+
+let cluster a =
+  cluster_helper [] a;;
+
+let rec slice a i j =
+  if i > j then []
+  else if (j > (List.length a)) then (slice a i (List.length a)) 
+  else match a with
+  | [] -> []
+  | [x] -> a
+  | _ -> if (i < j) then [List.nth a i] @ (slice a (i+1) j) else [];;
+
+let composition f g x=
+  f(g(x));;
+
+let equiv_on f g (lst: 'a list) =
+  if (List.map (fun x -> f x) lst) = (List.map (fun x -> g x) lst) then true else false;;
+
+let rec pairwisefilter cmp lst =
+  match lst with
+  | [] -> []
+  | [x] -> lst
+  | _ -> [cmp (List.nth lst 0) (List.nth lst 1)] @ (pairwisefilter cmp (List.tl (List.tl lst)));; 
+
+let polynomial_helper (a,b) x =
+   a* pow b x;;
+
+let rec polynomial lst a =
+    match lst with
+    | [] -> 0
+    | [x] -> (polynomial_helper (List.hd lst) a)
+    | _ -> (polynomial_helper (List.nth lst 0) a) + (polynomial (List.tl lst) a);;
+
+type bool_expr =
+  | Lit of string
+  | Not of bool_expr
+  | And of bool_expr * bool_expr
+  | Or of bool_expr * bool_expr
+
+let rec evaluate_expr a truth_value_of_a b truth_value_of_b = function
+  | Lit(x) -> if x = a then truth_value_of_a else truth_value_of_b
+  | Not(x) -> not(evaluate_expr a truth_value_of_a b truth_value_of_b x)
+  | And(x, y) -> (evaluate_expr a truth_value_of_a b truth_value_of_b x) && (evaluate_expr a truth_value_of_a b truth_value_of_b y)
+  | Or(x, y) -> (evaluate_expr a truth_value_of_a b truth_value_of_b x) || (evaluate_expr a truth_value_of_a b truth_value_of_b y)
+
+let truth_table a b expr =
+  [(true, true, evaluate_expr a true b true expr);
+   (true, false, evaluate_expr a true b false expr);
+   (false, true, evaluate_expr a false b true expr);
+   (false, false, evaluate_expr a false b false expr)];;
+
+type 'a binary_tree =
+  | Empty
+  | Node of 'a * 'a binary_tree * 'a binary_tree
+
+let rec tree2str a = 
+  match a with
+  | Empty -> ""
+  | Node(x, Empty, Empty) -> string_of_int x
+  | Node(x, l, Empty) -> string_of_int x ^ "(" ^ (tree2str l) ^ "," ^ "" ^ ")"
+  | Node(x, Empty, r) -> string_of_int x ^ "(" ^ "" ^ "," ^ (tree2str r) ^ ")"
+  | Node(x, l, r) -> string_of_int x ^ "(" ^ (tree2str l) ^ "," ^ (tree2str r) ^ ")";;
